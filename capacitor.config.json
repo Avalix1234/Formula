@@ -1,0 +1,6 @@
+{
+  "appId": "com.formula.school",
+  "appName": "Formula",
+  "webDir": "www",
+  "bundledWebRuntime": false
+}
