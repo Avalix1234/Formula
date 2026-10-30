@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#111111">
+<title>Formula</title>
+<style>
+:root{--bg:#080808;--panel:#151515;--panel2:#202020;--text:#f5f5f5;--muted:#a8a8a8;--line:#333;--accent:#fff}
+body.light{--bg:#f6f6f6;--panel:#fff;--panel2:#ededed;--text:#111;--muted:#666;--line:#ddd;--accent:#111}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:16px system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+header{padding:22px 18px 14px;position:sticky;top:0;background:var(--bg);border-bottom:1px solid var(--line);z-index:5}
+.brand{font-size:27px;font-weight:800;letter-spacing:-.8px}.sub{color:var(--muted);font-size:13px;margin-top:3px}
+.wrap{max-width:760px;margin:auto;padding:16px 16px 90px}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.space{justify-content:space-between}
+h2{font-size:20px;margin:20px 0 12px}h3{font-size:17px;margin:0 0 7px}
+button,.card,.field{border:1px solid var(--line);border-radius:14px;background:var(--panel);color:var(--text)}
+button{padding:12px 14px;font:inherit;cursor:pointer}.primary{background:var(--accent);color:var(--bg);font-weight:700}
+.small{font-size:13px;color:var(--muted)}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.card{padding:15px;text-align:left;min-width:0}.card:active,button:active{transform:scale(.99)}
+.card .big{font-size:23px;font-weight:750;margin-bottom:6px}.card .title{font-weight:700;margin-bottom:5px}.card .desc{font-size:13px;color:var(--muted);line-height:1.4}
+.field{width:100%;padding:13px 14px;font:inherit;outline:none;background:var(--panel)}
+.pills{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}.pill{padding:8px 11px;border-radius:99px;font-size:13px}
+.list{display:grid;gap:9px}.item{padding:14px;border:1px solid var(--line);border-radius:13px;background:var(--panel);cursor:pointer}
+.formula{font-size:22px;font-weight:650;margin:9px 0;overflow-wrap:anywhere}.muted{color:var(--muted);line-height:1.5}
+.back{border:0;background:transparent;padding:8px 0;margin-right:10px}.topline{display:flex;align-items:center;gap:10px}.topline h2{margin:10px 0}
+.hidden{display:none!important}.nav{position:fixed;bottom:0;left:0;right:0;background:var(--bg);border-top:1px solid var(--line);display:flex;justify-content:center;gap:8px;padding:9px 10px calc(9px + env(safe-area-inset-bottom));z-index:6}.nav button{font-size:12px;padding:9px 12px;border-radius:11px}
+label{display:block;font-size:13px;color:var(--muted);margin:13px 0 6px}input,select{color:var(--text)}.result{margin-top:12px;padding:14px;border-radius:12px;background:var(--panel2);line-height:1.5}
+@media(min-width:560px){.grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+</style>
+</head>
+<body>
+<header><div class="row space"><div><div class="brand">Formula</div><div class="sub">Школьный справочник · 5–11 классы</div></div><button id="themeBtn" aria-label="Переключить тему">☼ / ☾</button></div></header>
+<main class="wrap">
+<section id="app"></section>
+</main>
+<nav class="nav">
+<button data-nav="home">⌂ Классы</button><button data-nav="search">⌕ Поиск</button><button data-nav="favorites">☆ Избранное</button><button data-nav="history">◷ История</button>
+</nav>
+<script>
+const subjectsByGrade={
+5:["Математика"],6:["Математика"],7:["Алгебра","Геометрия"],8:["Алгебра","Геометрия","Физика"],9:["Алгебра","Геометрия","Физика","Химия","Вероятность и статистика"],10:["Алгебра и начала анализа","Геометрия","Физика","Химия","Вероятность и статистика"],11:["Алгебра и начала анализа","Геометрия","Физика","Химия","Вероятность и статистика"]
+};
+// Initial sample set only; expand and verify against the chosen curriculum before claiming completeness.
+const formulas=[
+{id:"percent",grade:5,subject:"Математика",topic:"Проценты",name:"Найти процент от числа",expr:"часть = число × процент / 100",desc:"Чтобы найти p процентов от числа a, умножьте a на p и разделите на 100.",example:"20% от 150 = 150 × 20 / 100 = 30",vars:[{key:"a",label:"Число",unit:"",hint:"150"},{key:"p",label:"Процент",unit:"%",hint:"20"}],calc:v=>v.a*v.p/100,result:"Часть"},
+{id:"mean",grade:5,subject:"Математика",topic:"Среднее арифметическое",name:"Среднее арифметическое",expr:"x̄ = (x₁ + x₂ + … + xₙ) / n",desc:"Сложите все числа и разделите сумму на количество чисел.",example:"Для 4, 6 и 8: (4 + 6 + 8) / 3 = 6"},
+{id:"speed",grade:7,subject:"Физика",topic:"Равномерное движение",name:"Скорость",expr:"v = s / t",desc:"Скорость равна пройденному пути, делённому на время.",example:"120 км / 2 ч = 60 км/ч",vars:[{key:"s",label:"Путь s",unit:"м",hint:"120"},{key:"t",label:"Время t",unit:"с",hint:"2"}],calc:v=>v.t===0?null:v.s/v.t,result:"Скорость v"},
+{id:"distance",grade:7,subject:"Физика",topic:"Равномерное движение",name:"Путь при равномерном движении",expr:"s = v · t",desc:"Путь равен скорости, умноженной на время.",example:"5 м/с × 10 с = 50 м",vars:[{key:"v",label:"Скорость v",unit:"м/с",hint:"5"},{key:"t",label:"Время t",unit:"с",hint:"10"}],calc:v=>v.v*v.t,result:"Путь s"},
+{id:"density",grade:7,subject:"Физика",topic:"Плотность",name:"Плотность вещества",expr:"ρ = m / V",desc:"Плотность равна массе, делённой на объём.",example:"2 кг / 0,001 м³ = 2000 кг/м³",vars:[{key:"m",label:"Масса m",unit:"кг",hint:"2"},{key:"V",label:"Объём V",unit:"м³",hint:"1"}],calc:v=>v.V===0?null:v.m/v.V,result:"Плотность ρ"},
+{id:"rectangle",grade:5,subject:"Математика",topic:"Площади фигур",name:"Площадь прямоугольника",expr:"S = a · b",desc:"Площадь прямоугольника равна произведению длины и ширины.",example:"5 см × 3 см = 15 см²",vars:[{key:"a",label:"Длина a",unit:"",hint:"5"},{key:"b",label:"Ширина b",unit:"",hint:"3"}],calc:v=>v.a*v.b,result:"Площадь S"},
+{id:"triangle",grade:7,subject:"Геометрия",topic:"Площади фигур",name:"Площадь треугольника",expr:"S = (a · h) / 2",desc:"Умножьте основание на высоту, проведённую к нему, и разделите на два.",example:"Основание 8 см, высота 5 см: S = 8 × 5 / 2 = 20 см²",vars:[{key:"a",label:"Основание a",unit:"",hint:"8"},{key:"h",label:"Высота h",unit:"",hint:"5"}],calc:v=>v.a*v.h/2,result:"Площадь S"},
+{id:"circle",grade:8,subject:"Геометрия",topic:"Окружность и круг",name:"Площадь круга",expr:"S = πr²",desc:"Площадь круга равна числу π, умноженному на квадрат радиуса.",example:"При r = 2 см: S ≈ 3,14159 × 4 ≈ 12,57 см²",vars:[{key:"r",label:"Радиус r",unit:"",hint:"2"}],calc:v=>Math.PI*v.r*v.r,result:"Площадь S"},
+{id:"pythagoras",grade:8,subject:"Геометрия",topic:"Прямоугольный треугольник",name:"Теорема Пифагора",expr:"c² = a² + b²",desc:"В прямоугольном треугольнике квадрат гипотенузы равен сумме квадратов катетов.",example:"Если a = 3, b = 4, то c = √(9 + 16) = 5"},
+{id:"newton2",grade:9,subject:"Физика",topic:"Законы Ньютона",name:"Второй закон Ньютона",expr:"F = m · a",desc:"Равнодействующая сила равна произведению массы тела на его ускорение.",example:"m = 2 кг, a = 3 м/с²: F = 6 Н",vars:[{key:"m",label:"Масса m",unit:"кг",hint:"2"},{key:"a",label:"Ускорение a",unit:"м/с²",hint:"3"}],calc:v=>v.m*v.a,result:"Сила F"},
+{id:"ohm",grade:8,subject:"Физика",topic:"Электрический ток",name:"Закон Ома для участка цепи",expr:"I = U / R",desc:"Сила тока равна напряжению, делённому на сопротивление.",example:"U = 12 В, R = 4 Ом: I = 3 А",vars:[{key:"U",label:"Напряжение U",unit:"В",hint:"12"},{key:"R",label:"Сопротивление R",unit:"Ом",hint:"4"}],calc:v=>v.R===0?null:v.U/v.R,result:"Сила тока I"},
+{id:"work",grade:7,subject:"Физика",topic:"Работа и мощность",name:"Механическая работа",expr:"A = F · s",desc:"Для постоянной силы, направленной вдоль перемещения, работа равна силе, умноженной на путь.",example:"10 Н × 3 м = 30 Дж",vars:[{key:"F",label:"Сила F",unit:"Н",hint:"10"},{key:"s",label:"Путь s",unit:"м",hint:"3"}],calc:v=>v.F*v.s,result:"Работа A"},
+{id:"moles",grade:8,subject:"Химия",topic:"Количество вещества",name:"Количество вещества",expr:"n = m / M",desc:"Количество вещества равно массе образца, делённой на молярную массу.",example:"18 г воды / 18 г/моль = 1 моль",vars:[{key:"m",label:"Масса m",unit:"г",hint:"18"},{key:"M",label:"Молярная масса M",unit:"г/моль",hint:"18"}],calc:v=>v.M===0?null:v.m/v.M,result:"Количество вещества n"},
+{id:"prob",grade:9,subject:"Вероятность и статистика",topic:"Вероятность",name:"Классическая вероятность",expr:"P(A) = m / n",desc:"Если все исходы равновозможны, вероятность события равна числу благоприятных исходов, делённому на общее число исходов.",example:"3 благоприятных исхода из 10: P = 3/10 = 0,3 = 30%"}
+];
+const app=document.getElementById("app");
+let state={page:"home",grade:null,subject:null,topic:null,query:""};
+const get=(k,d=[])=>{try{return JSON.parse(localStorage.getItem(k))??d}catch{return d}};
+const save=(k,v)=>localStorage.setItem(k,JSON.stringify(v));
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+function go(page,extra={}){state={...state,...extra,page};render()}
+function back(){if(state.page==="detail")go("topics");else if(state.page==="topics")go("subjects",{topic:null});else if(state.page==="subjects")go("home",{grade:null,subject:null,topic:null});else go("home")}
+function heading(title,sub=""){return `<div class="topline"><button class="back" onclick="back()">← Назад</button><div><h2>${esc(title)}</h2>${sub?`<div class="small">${esc(sub)}</div>`:""}</div></div>`}
+function formulaCard(f){return `<div class="item" onclick="go('detail',{formulaId:'${f.id}'})"><div class="row space"><strong>${esc(f.name)}</strong><span class="small">${f.grade} кл.</span></div><div class="formula">${esc(f.expr)}</div><div class="small">${esc(f.subject)} · ${esc(f.topic)}</div></div>`}
+function render(){
+let html="";
+if(state.page==="home"){
+html=`<h2>Выбери класс</h2><p class="muted">Начни с класса, затем выбери предмет, тему и формулу.</p><div class="grid">${[5,6,7,8,9,10,11].map(g=>`<button class="card" onclick="go('subjects',{grade:${g},subject:null,topic:null})"><div class="big">${g}</div><div class="title">класс</div><div class="desc">Предметы и темы</div></button>`).join("")}</div><div class="result"><strong>Справочник развивается</strong><div class="muted">Это стартовая версия с примерами структуры и расчётов. Полноту формул по официальным программам нужно проверять и расширять отдельно.</div></div>`;
+}else if(state.page==="subjects"){
+let subs=subjectsByGrade[state.grade]||[];
+html=heading(`${state.grade} класс`,"Выбери предмет") + `<div class="grid">${subs.map(s=>`<button class="card" onclick="go('topics',{subject:${JSON.stringify(s)}})"><div class="title">${esc(s)}</div><div class="desc">${formulas.filter(f=>f.grade===state.grade&&f.subject===s).length} примеров формул в стартовой версии</div></button>`).join("")}</div>`;
+}else if(state.page==="topics"){
+let list=formulas.filter(f=>(f.grade===state.grade)&&f.subject===state.subject);
+let topics=[...new Set(list.map(f=>f.topic))];
+html=heading(state.subject,`${state.grade} класс`) + `<button class="card" style="width:100%;margin-bottom:12px" onclick="go('allformulas')">Все формулы предмета →</button><h3>Темы</h3><div class="list">${topics.length?topics.map(t=>`<div class="item" onclick="go('topicformulas',{topic:${JSON.stringify(t)}})"><strong>${esc(t)}</strong><div class="small">${list.filter(f=>f.topic===t).length} формул в стартовой версии</div></div>`).join(""):`<div class="result muted">Материалы для этого раздела ещё добавляются. Структура предмета готова.</div>`}</div>`;
+}else if(state.page==="topicformulas"||state.page==="allformulas"){
+let list=formulas.filter(f=>f.grade===state.grade&&f.subject===state.subject&&(state.page==="allformulas"||f.topic===state.topic));
+html=heading(state.page==="allformulas"?"Все формулы":state.topic,`${state.grade} класс · ${state.subject}`)+`<div class="list">${list.length?list.map(formulaCard).join(""):`<div class="result muted">Формулы для этой темы ещё не добавлены.</div>`}</div>`;
+}else if(state.page==="detail"){
+let f=formulas.find(x=>x.id===state.formulaId);
+if(!f){html=heading("Формула","Не найдена");}
+else{
+let fav=get("formula-favs",[]).includes(f.id);
+let calc=f.vars?.length?`<h3>Рассчитать</h3>${f.vars.map(v=>`<label>${esc(v.label)}${v.unit?` (${esc(v.unit)})`:""}</label><input class="field" type="number" inputmode="decimal" id="v_${v.key}" placeholder="${esc(v.hint)}">`).join("")}<button class="primary" style="margin-top:14px;width:100%" onclick="calculate('${f.id}')">Рассчитать</button><div id="calcResult"></div>`:`<div class="result muted">Для этой формулы интерактивный расчёт пока не добавлен.</div>`;
+html=heading(f.name,`${f.grade} класс · ${f.subject} · ${f.topic}`)+`<div class="card"><div class="formula">${esc(f.expr)}</div><p class="muted">${esc(f.desc)}</p><h3>Пример</h3><p class="muted">${esc(f.example||"Пример будет добавлен.")}</p></div><div class="row" style="margin-top:12px"><button onclick="toggleFav('${f.id}')">${fav?"★ В избранном":"☆ В избранное"}</button><button onclick="remember('${f.id}')">Сохранить в историю</button></div><div class="card" style="margin-top:12px">${calc}</div>`;
+}}
+else if(state.page==="search"){
+html=`<h2>Поиск</h2><input class="field" id="searchInput" placeholder="Формула, тема или предмет…" value="${esc(state.query)}"><div class="pills">${[5,6,7,8,9,10,11].map(g=>`<button class="pill" onclick="searchGrade(${g})">${g} кл.</button>`).join("")}<button class="pill" onclick="searchGrade(0)">Все классы</button></div><div class="list" id="searchResults">${searchResults(state.query)}</div>`;
+}
+else if(state.page==="favorites"||state.page==="history"){
+let ids=get(state.page==="favorites"?"formula-favs":"formula-history",[]);
+let list=ids.map(id=>formulas.find(f=>f.id===id)).filter(Boolean);
+html=`<h2>${state.page==="favorites"?"Избранное":"История расчётов"}</h2>${list.length?`<div class="list">${list.map(formulaCard).join("")}</div>`:`<div class="result muted">${state.page==="favorites"?"Здесь будут сохранённые формулы.":"Здесь будут недавно открытые формулы."}</div>`}`;
+}
+app.innerHTML=html;
+let inp=document.getElementById("searchInput");if(inp)inp.addEventListener("input",e=>{state.query=e.target.value;document.getElementById("searchResults").innerHTML=searchResults(state.query)});
+}
+function searchResults(q,grade=0){let s=q.trim().toLowerCase();return formulas.filter(f=>(!grade||f.grade===grade)&&(!s||[f.name,f.expr,f.topic,f.subject,String(f.grade)].join(" ").toLowerCase().includes(s))).map(formulaCard).join("")||`<div class="result muted">Ничего не найдено в текущем наборе примеров.</div>`}
+function searchGrade(g){let box=document.getElementById("searchResults");box.innerHTML=searchResults(state.query,g)}
+function toggleFav(id){let a=get("formula-favs",[]);a=a.includes(id)?a.filter(x=>x!==id):[id,...a];save("formula-favs",a);render()}
+function remember(id){let a=get("formula-history",[]).filter(x=>x!==id);save("formula-history",[id,...a].slice(0,50));alert("Формула сохранена в истории.");}
+function calculate(id){let f=formulas.find(x=>x.id===id);let vals={};for(let v of f.vars){let el=document.getElementById("v_"+v.key),n=Number(el.value);if(el.value.trim()===""||!Number.isFinite(n)){document.getElementById("calcResult").innerHTML='<div class="result">Проверь введённые значения.</div>';return}vals[v.key]=n}
+let n=f.calc(vals);let out=document.getElementById("calcResult");if(n===null||!Number.isFinite(n)){out.innerHTML='<div class="result">Невозможно выполнить расчёт: проверь значения.</div>';return}
+out.innerHTML=`<div class="result"><strong>${esc(f.result||"Результат")}: ${n.toLocaleString("ru-RU",{maximumFractionDigits:6})}</strong><div class="muted">Расчёт выполнен по формуле ${esc(f.expr)}. Проверь единицы измерения введённых значений.</div></div>`;
+let a=get("formula-history",[]).filter(x=>x!==id);save("formula-history",[id,...a].slice(0,50));
+}
+document.getElementById("themeBtn").onclick=()=>{let light=!document.body.classList.contains("light");document.body.classList.toggle("light",light);localStorage.setItem("formula-theme",light?"light":"dark")};
+document.querySelectorAll("[data-nav]").forEach(b=>b.onclick=()=>go(b.dataset.nav));
+if(localStorage.getItem("formula-theme")==="light")document.body.classList.add("light");
+render();
+</script>
+</body></html>
