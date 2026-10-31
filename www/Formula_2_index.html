@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#101827">
+<title>Formula — школьный справочник</title>
+<style>
+:root{--bg:#f3f6fb;--panel:#fff;--card:#fff;--text:#172033;--muted:#68758a;--line:#e4e9f1;--accent:#536dfe;--soft:#edf0ff;--shadow:0 8px 24px #26324a0d}
+[data-theme=dark]{--bg:#0d1421;--panel:#151f30;--card:#192538;--text:#edf2fc;--muted:#a0aec2;--line:#2a3950;--accent:#8b9aff;--soft:#273253;--shadow:0 8px 24px #0003}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:15px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+header{padding:22px max(16px,calc((100% - 1050px)/2)) 18px;background:linear-gradient(130deg,#182746,#394e9d);color:white}
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px}.brand{font-size:25px;font-weight:800;letter-spacing:.3px}.sub{opacity:.8;font-size:13px}
+button,select,input{font:inherit}button{cursor:pointer;border:0}.iconbtn{background:#ffffff20;color:white;border:1px solid #ffffff30;border-radius:12px;padding:9px 12px}
+main{max-width:1050px;margin:auto;padding:18px 16px 44px}.tabs{display:flex;gap:8px;overflow:auto;padding:3px 0 15px}.tab{white-space:nowrap;border:1px solid var(--line);background:var(--panel);color:var(--muted);border-radius:999px;padding:9px 15px}.tab.active{background:var(--accent);border-color:var(--accent);color:white}
+.controls{display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px;margin-bottom:12px}.search{grid-column:1/-1}input,select{width:100%;padding:12px 13px;border:1px solid var(--line);border-radius:12px;background:var(--panel);color:var(--text);outline:none}input:focus,select:focus{border-color:var(--accent)}
+.meta{display:flex;justify-content:space-between;align-items:center;color:var(--muted);font-size:13px;margin:12px 2px}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.formula{background:var(--card);border:1px solid var(--line);border-radius:17px;padding:15px;box-shadow:var(--shadow);min-width:0}.fhead{display:flex;justify-content:space-between;gap:8px;align-items:flex-start}.ftitle{font-weight:700;font-size:16px}.tag{font-size:11px;color:var(--accent);background:var(--soft);border-radius:7px;padding:3px 7px;white-space:nowrap}.equation{margin:14px 0 11px;padding:13px 8px;text-align:center;border-radius:11px;background:var(--soft);font-size:21px;font-weight:700;overflow-wrap:anywhere}.detail{font-size:13px;color:var(--muted);margin:6px 0}.detail b{color:var(--text);font-weight:600}.actions{display:flex;justify-content:flex-end;margin-top:10px}.fav{background:transparent;color:var(--muted);font-size:20px;padding:2px 5px}.fav.on{color:#f2a900}.empty{grid-column:1/-1;text-align:center;color:var(--muted);padding:35px 10px;background:var(--panel);border:1px dashed var(--line);border-radius:15px}
+.section{display:none}.section.active{display:block}.panel{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:12px}.panel h3{margin:0 0 12px}.calcgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.calcgrid label{font-size:13px;color:var(--muted)}.calcgrid input{margin-top:5px}.result{margin-top:12px;background:var(--soft);border-radius:12px;padding:13px;font-weight:700;min-height:48px}.smallbtn{background:var(--accent);color:white;border-radius:10px;padding:10px 14px;margin-top:10px}.historyitem{padding:10px 0;border-bottom:1px solid var(--line);font-size:14px}.historyitem:last-child{border:0}
+footer{text-align:center;color:var(--muted);font-size:12px;padding:25px 0 0}
+@media(max-width:650px){.grid{grid-template-columns:1fr}.controls{grid-template-columns:1fr 1fr}.search{grid-column:1/-1}.brand{font-size:23px}.equation{font-size:19px}}
+</style>
+</head>
+<body>
+<header><div class="top"><div><div class="brand">ƒ Formula</div><div class="sub">Школьные формулы • 5–11 классы</div></div><button class="iconbtn" id="themeBtn" aria-label="Сменить тему">☾ Тема</button></div></header>
+<main>
+<nav class="tabs">
+<button class="tab active" data-tab="catalog">Формулы</button><button class="tab" data-tab="favorites">Избранное</button><button class="tab" data-tab="history">История</button><button class="tab" data-tab="calculators">Калькуляторы</button>
+</nav>
+<section id="catalog" class="section active">
+<div class="controls">
+<input class="search" id="search" placeholder="Поиск формулы, темы или обозначения…">
+<select id="subject"><option value="">Все предметы</option><option>Математика</option><option>Физика</option><option>Химия</option></select>
+<select id="grade"><option value="">Все классы</option><option>5</option><option>6</option><option>7</option><option>8</option><option>9</option><option>10</option><option>11</option></select>
+<select id="sectionFilter"><option value="">Все разделы</option></select>
+</div>
+<div class="meta"><span id="count">Загрузка…</span><span>Нажмите ★, чтобы сохранить</span></div><div class="grid" id="formulaGrid"></div>
+</section>
+<section id="favorites" class="section"><div class="meta"><span>Сохранённые формулы</span><span id="favCount"></span></div><div class="grid" id="favoriteGrid"></div></section>
+<section id="history" class="section"><div class="panel"><h3>Недавно открытые</h3><div id="historyList"></div><button class="smallbtn" id="clearHistory">Очистить историю</button></div></section>
+<section id="calculators" class="section">
+<div class="panel"><h3>Калькулятор</h3><div class="calcgrid"><label>Первое число<input id="a" type="number" step="any" placeholder="Например, 12"></label><label>Второе число<input id="b" type="number" step="any" placeholder="Например, 5"></label></div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="smallbtn" data-op="+">Сложить +</button><button class="smallbtn" data-op="-">Вычесть −</button><button class="smallbtn" data-op="*">Умножить ×</button><button class="smallbtn" data-op="/">Разделить ÷</button></div><div class="result" id="basicResult">Результат появится здесь</div></div>
+<div class="panel"><h3>Процент от числа</h3><div class="calcgrid"><label>Число<input id="percentBase" type="number" step="any" placeholder="200"></label><label>Процент (%)<input id="percentValue" type="number" step="any" placeholder="15"></label></div><button class="smallbtn" id="percentBtn">Вычислить</button><div class="result" id="percentResult">Результат появится здесь</div></div>
+<div class="panel"><h3>Путь, скорость и время</h3><div class="calcgrid"><label>Скорость (м/с)<input id="speed" type="number" step="any"></label><label>Время (с)<input id="time" type="number" step="any"></label></div><button class="smallbtn" id="distanceBtn">Найти путь</button><div class="result" id="distanceResult">S = v × t</div></div>
+</section>
+<footer>Formula • Справочник школьных формул</footer>
+</main>
+<script>
+const raw = `
+Площадь квадрата|S = a²|a — сторона квадрата|При a = 4 см: S = 16 см²|Математика|5|Геометрия
+Периметр квадрата|P = 4a|a — сторона квадрата|При a = 3 см: P = 12 см|Математика|5|Геометрия
+Площадь прямоугольника|S = ab|a, b — стороны|При 5 см и 3 см: S = 15 см²|Математика|5|Геометрия
+Периметр прямоугольника|P = 2(a + b)|a, b — стороны|При 5 см и 3 см: P = 16 см|Математика|5|Геометрия
+Площадь треугольника|S = ah / 2|a — основание, h — высота|a = 6 см, h = 4 см: S = 12 см²|Математика|5|Геометрия
+Площадь круга|S = πr²|r — радиус, π ≈ 3,14|r = 2 см: S ≈ 12,56 см²|Математика|6|Геометрия
+Длина окружности|C = 2πr|r — радиус|r = 3 см: C ≈ 18,84 см|Математика|6|Геометрия
+Диаметр окружности|d = 2r|r — радиус|r = 5 см: d = 10 см|Математика|6|Геометрия
+Среднее арифметическое|x̄ = (x₁ + … + xₙ) / n|x — значения, n — их количество|Для 2, 4, 6 среднее равно 4|Математика|5|Арифметика
+Процент числа|p% от a = ap / 100|a — число, p — процент|20% от 150 = 30|Математика|5|Проценты
+Нахождение числа по проценту|a = b × 100 / p|b — известная часть, p — процент|30 составляет 20%: a = 150|Математика|6|Проценты
+Путь по скорости и времени|S = vt|v — скорость, t — время|60 км/ч × 2 ч = 120 км|Математика|5|Движение
+Скорость|v = S / t|S — путь, t — время|150 км за 3 ч: 50 км/ч|Математика|5|Движение
+Время движения|t = S / v|S — путь, v — скорость|120 км при 60 км/ч: 2 ч|Математика|5|Движение
+Сумма дробей с общим знаменателем|a/c + b/c = (a+b)/c|c — общий знаменатель|2/7 + 3/7 = 5/7|Математика|5|Дроби
+Произведение дробей|a/b × c/d = ac/bd|b,d ≠ 0|2/3 × 3/4 = 1/2|Математика|5|Дроби
+Деление дробей|a/b : c/d = ad/bc|b,c,d ≠ 0|1/2 : 3/4 = 2/3|Математика|6|Дроби
+Основное свойство пропорции|a/b = c/d ⇒ ad = bc|b,d ≠ 0|2/3 = 4/6|Математика|6|Пропорции
+Модуль числа| |a| = a, если a ≥ 0; −a, если a < 0|Модуль — расстояние до нуля||-5| = 5|Математика|6|Числа
+Степень произведения|(ab)ⁿ = aⁿbⁿ|a,b — основания, n — степень| (2×3)² = 36|Математика|7|Степени
+Степень частного|(a/b)ⁿ = aⁿ/bⁿ|b ≠ 0| (6/2)² = 9|Математика|7|Степени
+Произведение степеней|aᵐ × aⁿ = aᵐ⁺ⁿ|Основание одинаковое|2² × 2³ = 2⁵ = 32|Математика|7|Степени
+Частное степеней|aᵐ / aⁿ = aᵐ⁻ⁿ|a ≠ 0|3⁵ / 3² = 3³ = 27|Математика|7|Степени
+Степень степени|(aᵐ)ⁿ = aᵐⁿ|m,n — показатели| (2²)³ = 2⁶|Математика|7|Степени
+Квадрат суммы|(a+b)² = a²+2ab+b²|Формула сокращённого умножения| (x+3)² = x²+6x+9|Математика|7|Алгебра
+Квадрат разности|(a−b)² = a²−2ab+b²|Формула сокращённого умножения| (x−2)² = x²−4x+4|Математика|7|Алгебра
+Разность квадратов|a²−b² = (a−b)(a+b)|Формула сокращённого умножения|x²−9 = (x−3)(x+3)|Математика|7|Алгебра
+Куб суммы|(a+b)³ = a³+3a²b+3ab²+b³|Формула сокращённого умножения| (x+1)³ = x³+3x²+3x+1|Математика|8|Алгебра
+Куб разности|(a−b)³ = a³−3a²b+3ab²−b³|Формула сокращённого умножения| (x−1)³ = x³−3x²+3x−1|Математика|8|Алгебра
+Сумма кубов|a³+b³ = (a+b)(a²−ab+b²)|Разложение на множители|8+27 = (2+3)(4−6+9)|Математика|8|Алгебра
+Разность кубов|a³−b³ = (a−b)(a²+ab+b²)|Разложение на множители|x³−8 = (x−2)(x²+2x+4)|Математика|8|Алгебра
+Линейная функция|y = kx + b|k — наклон, b — пересечение с Oy|y = 2x + 1|Математика|7|Функции
+Прямая пропорциональность|y = kx|k — коэффициент пропорциональности|При k=3: y=3x|Математика|7|Функции
+Обратная пропорциональность|y = k/x|x ≠ 0|При k=6, x=2: y=3|Математика|8|Функции
+Дискриминант|D = b² − 4ac|Для ax²+bx+c=0|x²−5x+6: D=1|Математика|8|Квадратные уравнения
+Корни квадратного уравнения|x₁,₂ = (−b ± √D)/(2a)|D ≥ 0, a ≠ 0|x²−5x+6=0: x=2 или 3|Математика|8|Квадратные уравнения
+Теорема Виета (сумма)|x₁ + x₂ = −b/a|Корни ax²+bx+c=0|x²−5x+6: сумма 5|Математика|8|Квадратные уравнения
+Теорема Виета (произведение)|x₁x₂ = c/a|Корни ax²+bx+c=0|x²−5x+6: произведение 6|Математика|8|Квадратные уравнения
+Арифметическая прогрессия, n-й член|aₙ = a₁ + d(n−1)|d — разность прогрессии|2,5,8…: a₁₀=29|Математика|9|Прогрессии
+Сумма арифметической прогрессии|Sₙ = (a₁+aₙ)n/2|a₁ — первый, aₙ — последний член|2+4+6+8=20|Математика|9|Прогрессии
+Геометрическая прогрессия, n-й член|bₙ = b₁qⁿ⁻¹|q — знаменатель прогрессии|2,6,18…: b₄=54|Математика|9|Прогрессии
+Сумма геометрической прогрессии|Sₙ = b₁(qⁿ−1)/(q−1)|q ≠ 1|2+4+8=14|Математика|9|Прогрессии
+Теорема Пифагора|c² = a² + b²|c — гипотенуза|3²+4²=5²|Математика|8|Геометрия
+Синус угла|sin α = противолежащий катет / гипотенуза|В прямоугольном треугольнике|sin 30° = 1/2|Математика|9|Тригонометрия
+Косинус угла|cos α = прилежащий катет / гипотенуза|В прямоугольном треугольнике|cos 60° = 1/2|Математика|9|Тригонометрия
+Тангенс угла|tg α = противолежащий / прилежащий катет|В прямоугольном треугольнике|tg 45° = 1|Математика|9|Тригонометрия
+Основное тригонометрическое тождество|sin²α + cos²α = 1|Для любого угла α|При sin α=0,6: cos² α=0,64|Математика|10|Тригонометрия
+Площадь параллелограмма|S = ah|a — основание, h — высота|a=8, h=3: S=24|Математика|8|Геометрия
+Площадь трапеции|S = (a+b)h/2|a,b — основания|4 и 8, h=3: S=18|Математика|8|Геометрия
+Объём куба|V = a³|a — ребро куба|a=3 см: V=27 см³|Математика|5|Стереометрия
+Объём прямоугольного параллелепипеда|V = abc|a,b,c — измерения|2×3×4=24 см³|Математика|5|Стереометрия
+Объём цилиндра|V = πr²h|r — радиус, h — высота|r=2, h=5: V=20π|Математика|10|Стереометрия
+Объём конуса|V = πr²h/3|r — радиус, h — высота|r=3, h=4: V=12π|Математика|10|Стереометрия
+Объём шара|V = 4πr³/3|r — радиус шара|r=3: V=36π|Математика|10|Стереометрия
+Площадь поверхности шара|S = 4πr²|r — радиус шара|r=2: S=16π|Математика|10|Стереометрия
+Теорема синусов|a/sin A = b/sin B = c/sin C|Стороны и противолежащие углы|Если a=5, A=30°, отношение =10|Математика|9|Геометрия
+Теорема косинусов|c² = a²+b²−2ab cos C|C — угол между a и b|При C=90° получаем Пифагора|Математика|9|Геометрия
+Вероятность события|P(A)=m/n|m — благоприятные, n — все равновозможные исходы|Шанс 1 из 6: P=1/6|Математика|9|Вероятность
+Комбинаторика: перестановки|Pₙ = n!|n — число элементов|Для 3 элементов: 3!=6|Математика|10|Комбинаторика
+Комбинаторика: сочетания|Cₙᵏ = n!/[k!(n−k)!]|Порядок не важен|C₅²=10|Математика|10|Комбинаторика
+Производная степени|(xⁿ)' = nxⁿ⁻¹|n — постоянная степень| (x³)'=3x²|Математика|10|Производная
+Производная суммы|(f+g)' = f' + g'|f,g — функции| (x²+3x)'=2x+3|Математика|10|Производная
+Производная синуса|(sin x)' = cos x|x измеряется в радианах| (sin x)'=cos x|Математика|10|Производная
+Производная косинуса|(cos x)' = −sin x|x измеряется в радианах| (cos x)'=−sin x|Математика|10|Производная
+Первообразная степени|∫xⁿdx = xⁿ⁺¹/(n+1)+C|n ≠ −1|∫x²dx=x³/3+C|Математика|11|Интегралы
+Формула сложных процентов|A = P(1+r)ⁿ|P — начальная сумма, r — ставка, n — периоды|1000 при 10% за 2 периода: 1210|Математика|10|Проценты
+Площадь ромба|S = d₁d₂/2|d₁,d₂ — диагонали|6 и 8 см: S=24 см²|Математика|8|Геометрия
+Длина дуги окружности|l = πrα/180°|α — центральный угол в градусах|r=6, α=90°: l=3π|Математика|9|Геометрия
+Радианная мера угла|α = l/r|l — длина дуги, r — радиус|Полный оборот: 2π рад|Математика|10|Тригонометрия
+Расстояние между точками|d = √[(x₂−x₁)²+(y₂−y₁)²]|Координаты двух точек|Между (0,0) и (3,4): 5|Математика|9|Координаты
+Координаты середины отрезка|M = ((x₁+x₂)/2; (y₁+y₂)/2)|Концы отрезка — две точки|Для (0,2) и (4,6): M(2,4)|Математика|9|Координаты
+Уравнение прямой через точку|y−y₀ = k(x−x₀)|k — угловой коэффициент|Через (1,2), k=3: y−2=3(x−1)|Математика|9|Координаты
+Скорость равномерного движения|v = s/t|s — путь, t — время|100 м за 20 с: 5 м/с|Физика|7|Механика
+Ускорение|a = (v−v₀)/t|v₀ — начальная скорость|Из 0 до 20 м/с за 4 с: 5 м/с²|Физика|9|Механика
+Путь при равномерном движении|s = vt|v — скорость, t — время|10 м/с за 5 с: 50 м|Физика|7|Механика
+Путь при равноускоренном движении|s = v₀t + at²/2|v₀ — начальная скорость|Покой, a=2 м/с², t=3 с: 9 м|Физика|9|Механика
+Скорость при равноускоренном движении|v = v₀ + at|a — ускорение|v₀=2, a=3, t=4: 14 м/с|Физика|9|Механика
+Второй закон Ньютона|F = ma|F — сила, m — масса, a — ускорение|2 кг × 3 м/с² = 6 Н|Физика|9|Динамика
+Сила тяжести|Fтяж = mg|g ≈ 9,8 м/с²|m=2 кг: F≈19,6 Н|Физика|7|Динамика
+Вес тела в покое|P = mg|P — вес тела|m=5 кг: P≈49 Н|Физика|7|Динамика
+Сила упругости (закон Гука)|Fупр = kx|k — жёсткость, x — удлинение|k=100 Н/м, x=0,02 м: 2 Н|Физика|9|Динамика
+Сила трения скольжения|Fтр = μN|μ — коэффициент трения, N — реакция опоры|μ=0,2, N=50 Н: 10 Н|Физика|9|Динамика
+Импульс тела|p = mv|m — масса, v — скорость|2 кг × 3 м/с = 6 кг·м/с|Физика|9|Законы сохранения
+Импульс силы|FΔt = Δp|Δp — изменение импульса|10 Н за 2 с: импульс 20 Н·с|Физика|10|Законы сохранения
+Кинетическая энергия|Eк = mv²/2|m — масса, v — скорость|m=2 кг, v=3 м/с: 9 Дж|Физика|8|Энергия
+Потенциальная энергия|Eп = mgh|h — высота, g — ускорение свободного падения|2 кг на 3 м: ≈58,8 Дж|Физика|8|Энергия
+Работа силы|A = Fs cos α|α — угол между силой и перемещением|F=10 Н, s=2 м, α=0: 20 Дж|Физика|7|Энергия
+Мощность|N = A/t|A — работа, t — время|100 Дж за 5 с: 20 Вт|Физика|7|Энергия
+Закон сохранения механической энергии|Eк + Eп = const|При отсутствии потерь энергии|Сумма энергий до и после одинакова|Физика|10|Энергия
+Давление|p = F/S|F — сила, S — площадь|100 Н на 2 м²: 50 Па|Физика|7|Давление
+Давление жидкости|p = ρgh|ρ — плотность, h — глубина|Вода на глубине 2 м: ≈19,6 кПа|Физика|7|Давление
+Архимедова сила|FА = ρжgV|ρж — плотность жидкости, V — объём вытесненной жидкости|0,01 м³ воды: ≈98 Н|Физика|7|Давление
+Плотность|ρ = m/V|m — масса, V — объём|200 г / 100 см³ = 2 г/см³|Физика|7|Величины
+Количество теплоты при нагревании|Q = cmΔt|c — удельная теплоёмкость|1 кг воды на 10°C: 42 кДж|Физика|8|Теплота
+Теплота плавления|Q = λm|λ — удельная теплота плавления|0,5 кг льда: Q=λ×0,5|Физика|8|Теплота
+Теплота парообразования|Q = Lm|L — удельная теплота парообразования|0,1 кг воды: Q=0,1L|Физика|8|Теплота
+Уравнение теплового баланса|Qотд = Qпол|Без потерь тепла в окружающую среду|Тепло горячей воды равно теплу, полученному холодной|Физика|8|Теплота
+Закон Кулона|F = k|q₁q₂|/r²|q₁,q₂ — заряды, r — расстояние|При увеличении r в 2 раза сила уменьшается в 4 раза|Физика|10|Электричество
+Сила тока|I = q/t|q — заряд, t — время|10 Кл за 2 с: 5 А|Физика|8|Электричество
+Напряжение|U = A/q|A — работа поля, q — заряд|12 Дж на 3 Кл: 4 В|Физика|8|Электричество
+Закон Ома для участка цепи|I = U/R|U — напряжение, R — сопротивление|12 В / 4 Ом = 3 А|Физика|8|Электричество
+Сопротивление проводника|R = ρl/S|ρ — удельное сопротивление|При удвоении длины R удваивается|Физика|8|Электричество
+Мощность электрического тока|P = UI|U — напряжение, I — сила тока|220 В × 2 А = 440 Вт|Физика|8|Электричество
+Работа электрического тока|A = UIt|U — напряжение, I — ток, t — время|12 В × 2 А × 5 с = 120 Дж|Физика|8|Электричество
+Закон Джоуля — Ленца|Q = I²Rt|I — ток, R — сопротивление|2² × 5 Ом × 3 с = 60 Дж|Физика|8|Электричество
+Последовательное соединение сопротивлений|R = R₁ + R₂ + …|Общее сопротивление|2 Ом + 3 Ом = 5 Ом|Физика|8|Электричество
+Параллельное соединение сопротивлений|1/R = 1/R₁ + 1/R₂|Общее сопротивление|Два резистора по 6 Ом дают 3 Ом|Физика|8|Электричество
+Период колебаний|T = t/N|N — число колебаний за время t|20 колебаний за 10 с: 0,5 с|Физика|9|Колебания и волны
+Частота колебаний|ν = 1/T|T — период|T=0,2 с: ν=5 Гц|Физика|9|Колебания и волны
+Скорость волны|v = λν|λ — длина волны, ν — частота|2 м × 5 Гц = 10 м/с|Физика|9|Колебания и волны
+Период математического маятника|T = 2π√(l/g)|l — длина маятника|Для l≈1 м период около 2 с|Физика|9|Колебания и волны
+Формула линзы|1/F = 1/d + 1/f|F — фокусное расстояние, d и f — расстояния|d=30 см, f=15 см: F=10 см|Физика|9|Оптика
+Оптическая сила линзы|D = 1/F|F — фокусное расстояние в метрах|F=0,5 м: D=2 дптр|Физика|9|Оптика
+Показатель преломления|n = c/v|c — скорость света в вакууме|Если v=2×10⁸ м/с, n=1,5|Физика|11|Оптика
+Формула Эйнштейна|E = mc²|m — масса, c — скорость света|1 г массы соответствует огромной энергии|Физика|11|Квантовая физика
+Энергия фотона|E = hν|h — постоянная Планка, ν — частота|Энергия растёт с частотой света|Физика|11|Квантовая физика
+Закон радиоактивного распада|N = N₀·2^(−t/T)|T — период полураспада|За 2 периода остаётся 1/4 ядер|Физика|11|Ядерная физика
+Количество вещества|n = m/M|m — масса, M — молярная масса|18 г воды / 18 г/моль = 1 моль|Химия|8|Расчёты
+Число частиц|N = nNА|NА — постоянная Авогадро|1 моль содержит ≈6,02×10²³ частиц|Химия|8|Расчёты
+Молярная масса|M = m/n|m — масса, n — количество вещества|36 г / 2 моль = 18 г/моль|Химия|8|Расчёты
+Массовая доля элемента|ω = m(элемента)/m(вещества)|ω — массовая доля|В 10 г смеси 2 г вещества: 20%|Химия|8|Расчёты
+Массовая доля в процентах|ω% = ω × 100%|ω — доля от 0 до 1|ω=0,25 соответствует 25%|Химия|8|Растворы
+Масса растворённого вещества|mв-ва = ωmраствора|ω — массовая доля|10% от 200 г = 20 г|Химия|8|Растворы
+Массовая доля раствора|ω = mв-ва/mраствора|Массы в одинаковых единицах|5 г соли в 100 г раствора: 5%|Химия|8|Растворы
+Молярная концентрация|C = n/V|n — моль, V — объём в литрах|0,5 моль в 1 л: 0,5 моль/л|Химия|9|Растворы
+Молярный объём газа|Vₘ = V/n|При н.у. Vₘ ≈ 22,4 л/моль|2 моль газа при н.у.: 44,8 л|Химия|8|Газы
+Объём газа при н.у.|V = 22,4n|n — количество вещества в молях|0,5 моль: 11,2 л|Химия|8|Газы
+Уравнение Менделеева — Клапейрона|pV = nRT|p — давление, V — объём, T — температура в K|Используется для расчёта состояния газа|Химия|10|Газы
+Закон Авогадро|V₁/n₁ = V₂/n₂|При одинаковых p и T|При удвоении количества газа объём удваивается|Химия|8|Газы
+Относительная плотность газа|D = M₁/M₂|Молярные массы газов|D(H₂ по воздуху)≈29/2=14,5|Химия|9|Газы
+Массовая доля выхода продукта|η = mпракт/mтеор × 100%|Практическая и теоретическая массы|8 г из теоретических 10 г: 80%|Химия|9|Расчёты
+Скорость химической реакции|v = Δc/Δt|Δc — изменение концентрации за время|Концентрация упала на 0,2 моль/л за 10 с: 0,02|Химия|10|Реакции
+Константа равновесия|K = [C]^c[D]^d/[A]^a[B]^b|Для aA+bB⇌cC+dD|Концентрации берут в равновесии|Химия|11|Равновесие
+Водородный показатель|pH = −lg[H⁺]|[H⁺] — концентрация ионов водорода|[H⁺]=10⁻³ моль/л: pH=3|Химия|10|Растворы
+Связь pH и pOH|pH + pOH = 14|Для водного раствора при 25°C|Если pH=5, pOH=9|Химия|10|Растворы
+Массовая доля изотопа (средняя масса)|Aᵣ = Σ(Aᵢ·xᵢ)|xᵢ — доля изотопа|Среднее рассчитывают с учётом распространённости|Химия|11|Атом
+Число окисления в простом веществе|Степень окисления = 0|Атомы одного элемента|O₂, H₂, Fe: 0|Химия|8|Строение вещества
+Сумма степеней окисления|Σ(степеней окисления) = заряд частицы|Для нейтральной молекулы сумма 0|В H₂O: 2(+1)+(−2)=0|Химия|8|Строение вещества
+Закон сохранения массы|m(реагентов) = m(продуктов)|В закрытой системе|12 г углерода + 32 г кислорода → 44 г CO₂|Химия|8|Реакции
+Тепловой эффект реакции|Q = Hпрод − Hисх|Изменение энтальпии реакции|Отрицательное ΔH — экзотермическая реакция|Химия|10|Термохимия
+Электролиз: закон Фарадея|m = kIt|k — электрохимический эквивалент|Масса осадка пропорциональна заряду|Химия|11|Электрохимия
+Масса по уравнению реакции|m = nM|n — количество вещества, M — молярная масса|2 моль NaCl: 117 г|Химия|8|Расчёты
+Объёмная доля газа|φ = Vгаза/Vсмеси × 100%|Объёмы при одинаковых условиях|21 л кислорода в 100 л воздуха: 21%|Химия|9|Газы
+Степень диссоциации|α = nдисс/nобщ|Доля распавшихся молекул|20 из 100 молекул: α=0,2|Химия|9|Электролиты
+Ионное произведение воды|Kᵥ = [H⁺][OH⁻] = 10⁻¹⁴|При 25°C|В нейтральной воде обе концентрации 10⁻⁷|Химия|10|Растворы
+Расчёт массы примесей|mчист = mобразца(1−ωприм)|ωприм — доля примесей|100 г с 5% примесей: 95 г чистого вещества|Химия|9|Расчёты
+Массовая доля примесей|ωприм = mприм/mобразца|Доли можно выразить в процентах|3 г примесей в 60 г образца: 5%|Химия|9|Расчёты
+`;
+const formulas = raw.trim().split('\n').map((line,i)=>{const p=line.split('|');return {id:i+1,title:p[0],eq:p[1],vars:p[2],example:p[3],subject:p[4],grade:p[5],section:p[6]};});
+const $=id=>document.getElementById(id);
+const read=(key,def)=>{try{return JSON.parse(localStorage.getItem(key))??def}catch{return def}};
+let favorites=read('formula_favorites',[]), history=read('formula_history',[]), activeTab='catalog';
+const save=()=>{localStorage.setItem('formula_favorites',JSON.stringify(favorites));localStorage.setItem('formula_history',JSON.stringify(history));};
+function card(f){return `<article class="formula"><div class="fhead"><div class="ftitle">${f.title}</div><span class="tag">${f.subject} · ${f.grade} кл.</span></div><div class="equation">${f.eq}</div><div class="detail"><b>Обозначения:</b> ${f.vars}</div><div class="detail"><b>Пример:</b> ${f.example}</div><div class="detail"><b>Раздел:</b> ${f.section}</div><div class="actions"><button class="fav ${favorites.includes(f.id)?'on':''}" data-fav="${f.id}" aria-label="В избранное">${favorites.includes(f.id)?'★':'☆'}</button></div></article>`}
+function showCards(list,target,empty){$(target).innerHTML=list.length?list.map(card).join(''):`<div class="empty">${empty}</div>`}
+function renderCatalog(){const q=$('search').value.toLowerCase().trim(),s=$('subject').value,g=$('grade').value,sec=$('sectionFilter').value;const list=formulas.filter(f=>(!s||f.subject===s)&&(!g||f.grade===g)&&(!sec||f.section===sec)&&(!q||[f.title,f.eq,f.vars,f.example,f.subject,f.section].join(' ').toLowerCase().includes(q)));$('count').textContent=`Найдено: ${list.length} из ${formulas.length}`;showCards(list,'formulaGrid','Ничего не найдено. Попробуйте изменить запрос или фильтры.')}
+function renderFavorites(){const list=formulas.filter(f=>favorites.includes(f.id));$('favCount').textContent=list.length;showCards(list,'favoriteGrid','Здесь пока пусто. Добавляйте формулы кнопкой ☆.')}
+function renderHistory(){$('historyList').innerHTML=history.length?history.map(id=>{const f=formulas.find(x=>x.id===id);return f?`<div class="historyitem">${f.title} <span style="color:var(--muted)">— ${f.subject}, ${f.grade} класс</span></div>`:''}).join(''):'<div class="detail">Вы ещё не открывали формулы.</div>'}
+function render(){renderCatalog();renderFavorites();renderHistory()}
+function setTab(tab){activeTab=tab;document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('active',b.dataset.tab===tab));document.querySelectorAll('.section').forEach(s=>s.classList.toggle('active',s.id===tab));if(tab==='favorites')renderFavorites();if(tab==='history')renderHistory()}
+document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>setTab(b.dataset.tab)));
+['search','subject','grade','sectionFilter'].forEach(id=>$(id).addEventListener(id==='search'?'input':'change',renderCatalog));
+const sections=[...new Set(formulas.map(f=>f.section))].sort();sections.forEach(s=>{const o=document.createElement('option');o.value=s;o.textContent=s;$('sectionFilter').append(o)});
+document.addEventListener('click',e=>{const b=e.target.closest('[data-fav]');if(!b)return;const id=Number(b.dataset.fav);favorites=favorites.includes(id)?favorites.filter(x=>x!==id):[...favorites,id];save();render();});
+document.addEventListener('click',e=>{const c=e.target.closest('.formula');if(!c||e.target.closest('button'))return;const title=c.querySelector('.ftitle')?.textContent;const f=formulas.find(x=>x.title===title);if(f){history=[f.id,...history.filter(x=>x!==f.id)].slice(0,30);save();}});
+$('clearHistory').onclick=()=>{history=[];save();renderHistory()};
+$('themeBtn').onclick=()=>{const next=document.documentElement.dataset.theme==='dark'?'light':'dark';document.documentElement.dataset.theme=next;localStorage.setItem('formula_theme',next);};
+document.documentElement.dataset.theme=localStorage.getItem('formula_theme')||'light';
+document.querySelectorAll('[data-op]').forEach(b=>b.onclick=()=>{const a=Number($('a').value),c=Number($('b').value),op=b.dataset.op;if($('a').value===''||$('b').value===''){$('basicResult').textContent='Введите оба числа';return}if(op==='/'&&c===0){$('basicResult').textContent='На ноль делить нельзя';return}const r=op==='+'?a+c:op==='-'?a-c:op==='*'?a*c:a/c;$('basicResult').textContent=`Результат: ${Number(r.toPrecision(12))}`});
+$('percentBtn').onclick=()=>{const a=Number($('percentBase').value),p=Number($('percentValue').value);if($('percentBase').value===''||$('percentValue').value===''){$('percentResult').textContent='Заполните оба поля';return}$('percentResult').textContent=`${p}% от ${a} = ${a*p/100}`};
+$('distanceBtn').onclick=()=>{const v=Number($('speed').value),t=Number($('time').value);if($('speed').value===''||$('time').value===''){$('distanceResult').textContent='Заполните оба поля';return}$('distanceResult').textContent=`Путь: ${v*t} м`};
+render();
+</script>
+</body></html>
